@@ -1,0 +1,52 @@
+[
+  {
+    "action_id": "ACT-001",
+    "timestamp": "2025-01-15T10:25:30Z",
+    "agent": "Energy Optimizer",
+    "action_type": "throttle",
+    "target_nodes": ["NODE-002", "NODE-005"],
+    "reason": "Traffic below 200 Mbps threshold, energy consumption > 75W. Throttling to save 45W total.",
+    "energy_saved_w": 45.2,
+    "success": true
+  },
+  {
+    "action_id": "ACT-002",
+    "timestamp": "2025-01-15T10:20:15Z",
+    "agent": "Traffic Balancer",
+    "action_type": "redistribute",
+    "target_nodes": ["NODE-001", "NODE-004", "NODE-007"],
+    "reason": "Load balancing: Redistributed 150 Mbps from NODE-001 to NODE-007 to optimize energy efficiency.",
+    "energy_saved_w": 12.5,
+    "success": true
+  },
+  {
+    "action_id": "ACT-003",
+    "timestamp": "2025-01-15T10:15:45Z",
+    "agent": "Sleep Scheduler",
+    "action_type": "sleep",
+    "target_nodes": ["NODE-003", "NODE-006"],
+    "reason": "Traffic < 20 Mbps for 15+ minutes. Putting nodes to sleep mode. Expected savings: 85W.",
+    "energy_saved_w": 85.7,
+    "success": true
+  },
+  {
+    "action_id": "ACT-004",
+    "timestamp": "2025-01-15T10:10:20Z",
+    "agent": "Anomaly Detector",
+    "action_type": "alert",
+    "target_nodes": ["NODE-008"],
+    "reason": "Detected unusual energy spike (120W → 82W). Investigated and normalized via throttling.",
+    "energy_saved_w": 38.0,
+    "success": true
+  },
+  {
+    "action_id": "ACT-005",
+    "timestamp": "2025-01-15T10:05:10Z",
+    "agent": "Energy Optimizer",
+    "action_type": "activate",
+    "target_nodes": ["NODE-004"],
+    "reason": "Traffic surge detected (650 → 920 Mbps). Activated NODE-004 to handle increased load.",
+    "energy_saved_w": 0,
+    "success": true
+  }
+]

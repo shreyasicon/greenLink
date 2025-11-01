@@ -1,0 +1,74 @@
+[
+  {
+    "node_id": "NODE-001",
+    "traffic_mbps": 850.5,
+    "energy_w": 185.2,
+    "status": "active",
+    "last_update": "2025-01-15T10:30:45Z",
+    "location": "Cell Tower Alpha",
+    "uptime_hours": 720
+  },
+  {
+    "node_id": "NODE-002",
+    "traffic_mbps": 125.3,
+    "energy_w": 78.5,
+    "status": "throttled",
+    "last_update": "2025-01-15T10:30:42Z",
+    "location": "Cell Tower Beta",
+    "uptime_hours": 680
+  },
+  {
+    "node_id": "NODE-003",
+    "traffic_mbps": 12.1,
+    "energy_w": 15.8,
+    "status": "sleeping",
+    "last_update": "2025-01-15T10:30:38Z",
+    "location": "Cell Tower Gamma",
+    "uptime_hours": 650
+  },
+  {
+    "node_id": "NODE-004",
+    "traffic_mbps": 920.7,
+    "energy_w": 210.3,
+    "status": "active",
+    "last_update": "2025-01-15T10:30:44Z",
+    "location": "Cell Tower Delta",
+    "uptime_hours": 710
+  },
+  {
+    "node_id": "NODE-005",
+    "traffic_mbps": 180.2,
+    "energy_w": 95.4,
+    "status": "throttled",
+    "last_update": "2025-01-15T10:30:40Z",
+    "location": "Cell Tower Epsilon",
+    "uptime_hours": 695
+  },
+  {
+    "node_id": "NODE-006",
+    "traffic_mbps": 5.8,
+    "energy_w": 8.2,
+    "status": "sleeping",
+    "last_update": "2025-01-15T10:30:35Z",
+    "location": "Cell Tower Zeta",
+    "uptime_hours": 630
+  },
+  {
+    "node_id": "NODE-007",
+    "traffic_mbps": 750.4,
+    "energy_w": 165.7,
+    "status": "active",
+    "last_update": "2025-01-15T10:30:46Z",
+    "location": "Cell Tower Eta",
+    "uptime_hours": 725
+  },
+  {
+    "node_id": "NODE-008",
+    "traffic_mbps": 145.9,
+    "energy_w": 82.1,
+    "status": "throttled",
+    "last_update": "2025-01-15T10:30:41Z",
+    "location": "Cell Tower Theta",
+    "uptime_hours": 670
+  }
+]

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { NodeCard } from "@/components/node-card"
 import { SummarySection } from "@/components/summary-section"
+import { AgentExplanationCard } from "@/components/agent-explanation-card"
 import { EnergyTrafficChart } from "@/components/energy-traffic-chart"
 import { StatusDistributionChart } from "@/components/status-distribution-chart"
 import { TrafficOverTimeChart } from "@/components/traffic-over-time-chart"
@@ -110,6 +111,9 @@ export default function Home() {
           totalTraffic={data.summary.total_traffic_mbps}
         />
       )}
+
+      {/* Agent Explanation Card */}
+      <AgentExplanationCard />
 
       {/* Updated Charts Section */}
       {data && (

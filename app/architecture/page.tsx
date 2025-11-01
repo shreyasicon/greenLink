@@ -15,67 +15,84 @@ const architectureBlocks: ArchitectureBlock[] = [
   {
     id: "edge",
     title: "Edge Nodes",
-    description: "6G network nodes collecting real-time traffic and energy metrics from the telecom infrastructure.",
+    description: "6G network nodes collecting real-time traffic and energy metrics.",
     icon: "📡",
-    position: { row: 0, col: 0 },
+    position: { row: 0, col: 1 },
   },
   {
     id: "gateway",
     title: "API Gateway",
-    description: "AWS API Gateway receives metrics from edge nodes and routes requests to backend services.",
+    description: "AWS API Gateway receives metrics from edge nodes and routes to backend.",
     icon: "🚪",
-    position: { row: 0, col: 1 },
+    position: { row: 1, col: 1 },
   },
   {
     id: "lambda-ingest",
     title: "Ingest Lambda",
-    description: "Processes incoming metrics, validates data, and stores in DynamoDB for analysis.",
+    description: "Processes and validates incoming metrics, stores in DynamoDB.",
     icon: "⚡",
-    position: { row: 1, col: 0 },
+    position: { row: 2, col: 0 },
   },
   {
     id: "dynamodb",
     title: "DynamoDB",
-    description: "NoSQL database storing node metrics, historical data, and optimization decisions.",
+    description: "NoSQL database storing node metrics and historical data.",
     icon: "💾",
-    position: { row: 1, col: 1 },
-  },
-  {
-    id: "bedrock",
-    title: "Bedrock Agent",
-    description: "AI agent powered by AWS Bedrock analyzes patterns and makes intelligent optimization decisions.",
-    icon: "🧠",
-    position: { row: 1, col: 2 },
-  },
-  {
-    id: "lambda-action",
-    title: "Action Lambda",
-    description: "Executes AI decisions by sending throttle/sleep commands back to edge nodes.",
-    icon: "⚙️",
     position: { row: 2, col: 1 },
+  },
+  {
+    id: "lambda-decision",
+    title: "Decision Lambda",
+    description: "AI-powered decision engine analyzes patterns and triggers actions.",
+    icon: "🧠",
+    position: { row: 2, col: 2 },
+  },
+  {
+    id: "actions-table",
+    title: "Actions Table",
+    description: "DynamoDB table storing all optimization actions and results.",
+    icon: "📋",
+    position: { row: 3, col: 1 },
   },
   {
     id: "dashboard",
     title: "Dashboard",
-    description: "Real-time visualization of network status, energy savings, and AI optimization actions.",
+    description: "Real-time visualization of network status and AI decisions.",
     icon: "📊",
-    position: { row: 2, col: 2 },
+    position: { row: 3, col: 2 },
   },
 ]
 
 const connections = [
-  { from: "edge", to: "gateway" },
-  { from: "gateway", to: "lambda-ingest" },
-  { from: "lambda-ingest", to: "dynamodb" },
-  { from: "dynamodb", to: "bedrock" },
-  { from: "bedrock", to: "lambda-action" },
-  { from: "lambda-action", to: "dashboard" },
-  { from: "lambda-action", to: "edge" },
+  { from: "edge", to: "gateway", label: "Metrics" },
+  { from: "gateway", to: "lambda-ingest", label: "POST /ingest" },
+  { from: "lambda-ingest", to: "dynamodb", label: "Write" },
+  { from: "dynamodb", to: "lambda-decision", label: "Query" },
+  { from: "lambda-decision", to: "actions-table", label: "Log Action" },
+  { from: "lambda-decision", to: "edge", label: "Control Signal" },
+  { from: "actions-table", to: "dashboard", label: "Display" },
+  { from: "dynamodb", to: "dashboard", label: "Real-time Data" },
 ]
 
 export default function ArchitecturePage() {
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null)
   const [hoveredBlock, setHoveredBlock] = useState<string | null>(null)
+
+  const getConnectionPath = (from: string, to: string) => {
+    const fromBlock = architectureBlocks.find((b) => b.id === from)
+    const toBlock = architectureBlocks.find((b) => b.id === to)
+    if (!fromBlock || !toBlock) return ""
+
+    const fromX = 200 + fromBlock.position.col * 350
+    const fromY = 120 + fromBlock.position.row * 180
+    const toX = 200 + toBlock.position.col * 350
+    const toY = 120 + toBlock.position.row * 180
+
+    // Create curved path for better visual flow
+    const midX = (fromX + toX) / 2
+    const midY = (fromY + toY) / 2
+    return `M ${fromX} ${fromY} Q ${midX} ${midY} ${toX} ${toY}`
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -93,9 +110,9 @@ export default function ArchitecturePage() {
           <p className="text-muted-foreground">AWS-based agentic network optimizer data flow</p>
         </motion.div>
 
-        <div className="relative mb-16" style={{ perspective: "2000px" }}>
+        <div className="relative mb-16 overflow-x-auto" style={{ perspective: "2000px" }}>
           {/* Flow Container with Grid Layout */}
-          <div className="relative grid grid-cols-3 gap-8 min-h-[600px]">
+          <div className="relative grid grid-cols-3 gap-8 min-h-[700px] min-w-[900px]">
             {architectureBlocks.map((block, index) => (
               <motion.div
                 key={block.id}
@@ -131,13 +148,9 @@ export default function ArchitecturePage() {
                   {block.icon}
                 </motion.div>
 
-                {/* Title */}
                 <h3 className="text-lg font-bold text-foreground mb-2">{block.title}</h3>
-
-                {/* Description */}
                 <p className="text-sm text-muted-foreground leading-relaxed">{block.description}</p>
 
-                {/* Pulse indicator */}
                 {(selectedBlock === block.id || hoveredBlock === block.id) && (
                   <motion.div
                     className="absolute -top-2 -right-2 w-4 h-4 bg-primary rounded-full"
@@ -162,59 +175,54 @@ export default function ArchitecturePage() {
                 </filter>
               </defs>
 
-              {connections.map((conn, idx) => (
-                <motion.g key={`${conn.from}-${conn.to}`}>
-                  <motion.path
-                    d={`M ${150 + architectureBlocks.find((b) => b.id === conn.from)!.position.col * 300} ${
-                      100 + architectureBlocks.find((b) => b.id === conn.from)!.position.row * 200
-                    } L ${150 + architectureBlocks.find((b) => b.id === conn.to)!.position.col * 300} ${
-                      100 + architectureBlocks.find((b) => b.id === conn.to)!.position.row * 200
-                    }`}
-                    stroke="oklch(0.6 0.18 142.5)"
-                    strokeWidth="3"
-                    fill="none"
-                    markerEnd="url(#arrowhead-3d)"
-                    filter="url(#glow)"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 0.6 }}
-                    transition={{ duration: 1.5, delay: idx * 0.2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
-                  />
-                  {/* Animated particle */}
-                  <motion.circle
-                    r="4"
-                    fill="oklch(0.75 0.2 85)"
-                    filter="url(#glow)"
-                    initial={{ opacity: 0 }}
-                    animate={{
-                      offsetDistance: ["0%", "100%"],
-                      opacity: [0, 1, 1, 0],
-                    }}
-                    transition={{ duration: 2, delay: idx * 0.3, repeat: Number.POSITIVE_INFINITY, repeatDelay: 2 }}
-                    style={{
-                      offsetPath: `path('M ${150 + architectureBlocks.find((b) => b.id === conn.from)!.position.col * 300} ${
-                        100 + architectureBlocks.find((b) => b.id === conn.from)!.position.row * 200
-                      } L ${150 + architectureBlocks.find((b) => b.id === conn.to)!.position.col * 300} ${
-                        100 + architectureBlocks.find((b) => b.id === conn.to)!.position.row * 200
-                      }')`,
-                    }}
-                  />
-                </motion.g>
-              ))}
+              {connections.map((conn, idx) => {
+                const path = getConnectionPath(conn.from, conn.to)
+                return (
+                  <motion.g key={`${conn.from}-${conn.to}`}>
+                    <motion.path
+                      d={path}
+                      stroke="oklch(0.6 0.18 142.5)"
+                      strokeWidth="3"
+                      fill="none"
+                      markerEnd="url(#arrowhead-3d)"
+                      filter="url(#glow)"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 0.6 }}
+                      transition={{ duration: 1.5, delay: idx * 0.2 }}
+                    />
+                    {/* Animated particle */}
+                    <motion.circle
+                      r="5"
+                      fill="oklch(0.75 0.2 85)"
+                      filter="url(#glow)"
+                      initial={{ opacity: 0 }}
+                      animate={{
+                        offsetDistance: ["0%", "100%"],
+                        opacity: [0, 1, 1, 0],
+                      }}
+                      transition={{ duration: 3, delay: idx * 0.4, repeat: Number.POSITIVE_INFINITY, repeatDelay: 2 }}
+                      style={{
+                        offsetPath: `path('${path}')`,
+                      }}
+                    />
+                  </motion.g>
+                )
+              })}
             </svg>
           </div>
         </div>
 
         {/* Key Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-lg border border-border bg-card/50 p-4">
+          <div className="rounded-lg border border-border bg-card/50 p-4 hover:border-primary/30 transition-colors">
             <h4 className="font-semibold text-foreground mb-2">Real-time Processing</h4>
             <p className="text-sm text-muted-foreground">Metrics processed in milliseconds with Lambda functions</p>
           </div>
-          <div className="rounded-lg border border-border bg-card/50 p-4">
+          <div className="rounded-lg border border-border bg-card/50 p-4 hover:border-primary/30 transition-colors">
             <h4 className="font-semibold text-foreground mb-2">AI-Powered Decisions</h4>
-            <p className="text-sm text-muted-foreground">Bedrock agents analyze patterns and optimize energy usage</p>
+            <p className="text-sm text-muted-foreground">Decision Lambda analyzes patterns and optimizes energy</p>
           </div>
-          <div className="rounded-lg border border-border bg-card/50 p-4">
+          <div className="rounded-lg border border-border bg-card/50 p-4 hover:border-primary/30 transition-colors">
             <h4 className="font-semibold text-foreground mb-2">Scalable Infrastructure</h4>
             <p className="text-sm text-muted-foreground">Serverless architecture scales automatically with demand</p>
           </div>
