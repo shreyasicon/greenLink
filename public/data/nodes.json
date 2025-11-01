@@ -70,5 +70,23 @@
     "last_update": "2025-01-15T10:30:41Z",
     "location": "Cell Tower Theta",
     "uptime_hours": 670
+  },
+  {
+    "node_id": "NODE-009",
+    "traffic_mbps": 8.4,
+    "energy_w": 12.5,
+    "status": "sleeping",
+    "last_update": "2025-01-15T10:30:33Z",
+    "location": "Cell Tower Iota",
+    "uptime_hours": 615
+  },
+  {
+    "node_id": "NODE-010",
+    "traffic_mbps": 680.3,
+    "energy_w": 152.8,
+    "status": "active",
+    "last_update": "2025-01-15T10:30:47Z",
+    "location": "Cell Tower Kappa",
+    "uptime_hours": 730
   }
 ]
