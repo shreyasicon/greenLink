@@ -1,76 +1,65 @@
+// components/node-performance-chart.tsx
 "use client"
 
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts"
+import { Line } from "react-chartjs-2"
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js"
 import type { NetworkNode } from "@/app/api/nodes/route"
 
-interface NodePerformanceChartProps {
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+
+interface Props {
   nodes: NetworkNode[]
 }
 
-export function NodePerformanceChart({ nodes }: NodePerformanceChartProps) {
-  // Calculate average metrics by status
-  const activeNodes = nodes.filter((n) => n.status === "active")
-  const throttledNodes = nodes.filter((n) => n.status === "throttled")
-  const sleepingNodes = nodes.filter((n) => n.status === "sleeping")
+export const NodePerformanceChart = ({ nodes }: Props) => {
+  const labels = nodes.map((node) => node.node_id)
+  const activateData = nodes.map((node) => node.action === "activate" ? 1 : 0)
+  const throttleData = nodes.map((node) => node.action === "throttle" ? 1 : 0)
+  const sleepData = nodes.map((node) => node.action === "sleep" ? 1 : 0)
 
-  const avgTraffic = (nodeList: NetworkNode[]) =>
-    nodeList.length > 0 ? nodeList.reduce((sum, n) => sum + n.traffic_mbps, 0) / nodeList.length : 0
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Activate",
+        data: activateData,
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        tension: 0.3,
+      },
+      {
+        label: "Throttle",
+        data: throttleData,
+        borderColor: "rgba(255, 206, 86, 1)",
+        backgroundColor: "rgba(255, 206, 86, 0.2)",
+        tension: 0.3,
+      },
+      {
+        label: "Sleep",
+        data: sleepData,
+        borderColor: "rgba(255, 99, 132, 1)",
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        tension: 0.3,
+      },
+    ],
+  }
 
-  const avgEnergy = (nodeList: NetworkNode[]) =>
-    nodeList.length > 0 ? nodeList.reduce((sum, n) => sum + n.energy_w, 0) / nodeList.length : 0
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { position: "bottom" as const },
+      title: { display: true, text: "Node Actions Performance" },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          callback: (value: number) => ["", "Yes"][value], // 0 -> "", 1 -> Yes
+        },
+      },
+    },
+  }
 
-  const chartData = [
-    {
-      metric: "Active Traffic",
-      value: Math.round(avgTraffic(activeNodes)),
-      fullMark: 1000,
-    },
-    {
-      metric: "Active Energy",
-      value: Math.round(avgEnergy(activeNodes)),
-      fullMark: 250,
-    },
-    {
-      metric: "Throttled Traffic",
-      value: Math.round(avgTraffic(throttledNodes)),
-      fullMark: 1000,
-    },
-    {
-      metric: "Throttled Energy",
-      value: Math.round(avgEnergy(throttledNodes)),
-      fullMark: 250,
-    },
-    {
-      metric: "Sleeping Traffic",
-      value: Math.round(avgTraffic(sleepingNodes)),
-      fullMark: 1000,
-    },
-  ]
-
-  return (
-    <div className="rounded-lg border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/30 transition-all duration-300">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Node Performance Radar</h3>
-      <ResponsiveContainer width="100%" height={280}>
-        <RadarChart data={chartData}>
-          <PolarGrid stroke="hsl(var(--border))" />
-          <PolarAngleAxis dataKey="metric" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-          <PolarRadiusAxis angle={90} domain={[0, "auto"]} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-          <Radar
-            name="Performance"
-            dataKey="value"
-            stroke="hsl(var(--chart-4))"
-            fill="hsl(var(--chart-4))"
-            fillOpacity={0.6}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "8px",
-            }}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
-    </div>
-  )
+  return <Line data={data} options={options} />
 }

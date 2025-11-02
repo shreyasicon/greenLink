@@ -1,49 +1,51 @@
+// components/status-distribution-chart.tsx
 "use client"
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { Pie } from "react-chartjs-2"
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js"
 
-interface StatusDistributionChartProps {
+ChartJS.register(ArcElement, Tooltip, Legend, Title)
+
+interface Props {
   activeNodes: number
   throttledNodes: number
   sleepingNodes: number
 }
 
-export function StatusDistributionChart({ activeNodes, throttledNodes, sleepingNodes }: StatusDistributionChartProps) {
-  const data = [
-    { name: "Active", value: activeNodes, color: "hsl(142, 76%, 36%)" },
-    { name: "Throttled", value: throttledNodes, color: "hsl(38, 92%, 50%)" },
-    { name: "Sleeping", value: sleepingNodes, color: "hsl(var(--muted))" },
-  ]
+export const StatusDistributionChart = ({ activeNodes, throttledNodes, sleepingNodes }: Props) => {
+  const data = {
+    labels: ["Active", "Throttled", "Sleeping"],
+    datasets: [
+      {
+        label: "Node Status",
+        data: [activeNodes, throttledNodes, sleepingNodes],
+        backgroundColor: [
+          "rgba(75, 192, 192, 0.7)", // Active
+          "rgba(255, 159, 64, 0.7)", // Throttled
+          "rgba(201, 203, 207, 0.7)", // Sleeping
+        ],
+        borderColor: [
+          "rgba(75, 192, 192, 1)",
+          "rgba(255, 159, 64, 1)",
+          "rgba(201, 203, 207, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  }
 
-  return (
-    <div className="rounded-lg border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/30 transition-all duration-300">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Node Status Distribution</h3>
-      <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-            outerRadius={90}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "8px",
-            }}
-          />
-          <Legend wrapperStyle={{ fontSize: "12px" }} />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-  )
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "bottom" as const,
+      },
+      title: {
+        display: true,
+        text: "Node Status Distribution",
+      },
+    },
+  }
+
+  return <Pie data={data} options={options} />
 }

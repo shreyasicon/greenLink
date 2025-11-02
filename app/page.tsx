@@ -11,7 +11,15 @@ import { TrafficOverTimeChart } from "@/components/traffic-over-time-chart"
 import { EnergyEfficiencyChart } from "@/components/energy-efficiency-chart"
 import { NodePerformanceChart } from "@/components/node-performance-chart"
 import { ResponseTimeChart } from "@/components/response-time-chart"
-import type { NetworkNode } from "@/app/api/nodes/route"
+
+interface NetworkNode {
+  node_id: string
+  traffic_mbps: number
+  energy_w: number
+  status: string
+  energy_saved_w?: number
+  response_ms?: number
+}
 
 interface ApiResponse {
   nodes: NetworkNode[]
@@ -27,6 +35,9 @@ interface ApiResponse {
   }
 }
 
+// ✅ Replace with your actual API Gateway URL
+const API_BASE = "https://jupvdwg1i1.execute-api.us-east-1.amazonaws.com/prod"
+
 export default function Home() {
   const [data, setData] = useState<ApiResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -36,9 +47,26 @@ export default function Home() {
   const fetchData = async () => {
     try {
       setIsRefreshing(true)
-      const response = await fetch("/api/nodes")
-      const json = await response.json()
-      setData(json)
+      const [nodesRes, actionsRes] = await Promise.all([
+        fetch(`${API_BASE}/nodes`),
+        fetch(`${API_BASE}/actions`)
+      ])
+
+      const nodes: NetworkNode[] = await nodesRes.json()
+      const actions: any[] = await actionsRes.json()
+
+      const summary = {
+        total_energy_w: nodes.reduce((acc, n) => acc + n.energy_w, 0),
+        total_traffic_mbps: nodes.reduce((acc, n) => acc + n.traffic_mbps, 0),
+        active_nodes: actions.filter(a => a.action === "activate").length,
+        throttled_nodes: actions.filter(a => a.action === "throttle").length,
+        sleeping_nodes: actions.filter(a => a.action === "sleep").length,
+        energy_saved_w: actions.reduce((acc, a) => acc + (a.energy_saved_w || 0), 0),
+        last_optimization: new Date().toLocaleString(),
+        ai_action: actions.length > 0 ? actions[actions.length - 1].action : "N/A"
+      }
+
+      setData({ nodes, summary })
       setLastRefresh(new Date())
       setIsLoading(false)
     } catch (error) {
@@ -50,7 +78,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchData()
-    const interval = setInterval(fetchData, 30000) // Auto-refresh every 30s
+    const interval = setInterval(fetchData, 30000)
     return () => clearInterval(interval)
   }, [])
 
@@ -115,7 +143,7 @@ export default function Home() {
       {/* Agent Explanation Card */}
       <AgentExplanationCard />
 
-      {/* Updated Charts Section */}
+      {/* Charts Section */}
       {data && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">Analytics Dashboard</h2>
