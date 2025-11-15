@@ -321,3 +321,4 @@ For issues or questions:
 ---
 
 **Built with 🌱 for sustainable 6G networks**
+https://v0.app/chat/green-link-lite-dashboard-sQTIgzSnIPN
